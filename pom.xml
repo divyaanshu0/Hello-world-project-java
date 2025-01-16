@@ -18,7 +18,7 @@
     </parent>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>17</java.version> <!-- Ensure Java 17 is used -->
     </properties>
 
     <dependencies>
@@ -38,6 +38,17 @@
 
     <build>
         <plugins>
+            <!-- Maven Compiler Plugin to ensure Java 17 is used for compilation -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>17</source> <!-- Set the Java version for source -->
+                    <target>17</target> <!-- Set the Java version for target -->
+                </configuration>
+            </plugin>
+
             <!-- Spring Boot Maven Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
