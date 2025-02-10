@@ -1,0 +1,58 @@
+pipeline {
+    agent any  // Runs on the Jenkins server
+
+    environment {
+        REPO_URL = "https://github.com/divyaanshu0/Hello-world-project-java.git"
+        BRANCH = "main"
+        IMAGE_NAME = "java-docker-app"
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: "${BRANCH}", url: "${REPO_URL}"
+            }
+        }
+
+        stage('Build Java Application') {
+            steps {
+                sh 'mvn clean package -DskipTests'  // Skip tests for faster build
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .'
+            }
+        }
+
+        
+        stage('Deploy') {
+            steps {
+                script {
+                    sh '''
+                    docker stop ${IMAGE_NAME} || true
+                    docker rm ${IMAGE_NAME} || true
+                    docker pull ${DOCKER_HUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER}
+                    docker run -d -p 8000:8000 --name ${IMAGE_NAME} ${DOCKER_HUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER}
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Application successfully deployed with build number: ${BUILD_NUMBER}"
+        }
+        failure {
+            echo "Build or deployment failed!"
+        }
+    }
+}
